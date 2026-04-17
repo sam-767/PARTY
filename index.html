@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Lipsu</title>
+    <style>
+        :root {
+            --sky-blue: #87CEEB;
+            --chocolate: #7B3F00;
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; overflow-x: hidden; }
+        
+        /* Initial Landing Page */
+        #landing-page {
+            height: 100vh;
+            background-color: var(--sky-blue);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .main-msg { font-style: italic; font-size: 3rem; margin-bottom: 20px; color: white; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); }
+        .sub-msg { font-size: 1.2rem; max-width: 600px; line-height: 1.6; color: #333; }
+        #start-btn { position: absolute; top: 20px; right: 20px; padding: 10px 20px; background: white; border: none; border-radius: 20px; cursor: pointer; font-weight: bold; }
+
+        /* Game Page */
+        #game-page { display: none; padding: 20px; background: #fdf5e6; min-height: 100vh; text-align: center; }
+        #board-container { position: relative; width: 500px; height: 500px; margin: 20px auto; border: 5px solid var(--chocolate); display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(10, 1fr); }
+        .cell { border: 1px solid #ddd; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; background: white; position: relative; }
+        
+        #token { width: 30px; height: 30px; font-size: 25px; position: absolute; transition: all 0.5s ease; z-index: 10; }
+        #dice-zone { margin: 20px; }
+        #dice-btn { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; background: #ff69b4; color: white; border: none; border-radius: 10px; }
+        #status-msg { height: 50px; font-weight: bold; color: #d81b60; margin: 10px; font-size: 1.1rem; }
+
+        /* Modals */
+        .modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.5); z-index: 100; text-align: center; }
+        .cake { font-size: 80px; }
+        .box-btn { background: gold; padding: 15px; cursor: pointer; border-radius: 10px; margin-top: 10px; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <div id="landing-page">
+        <button id="start-btn" onclick="showGame()">Enter the Game 🍫</button>
+        <h1 class="main-msg">Happiest Birthday LIPSU</h1>
+        <p class="sub-msg">
+            "i love you a lot that every friendship i make is just inspired by you, i literally look for you in everyone, 
+            i don't express how much i love you and also am not even texting you consistently to let you know how 
+            special you are for me i am sorry and i will always be sorry but the fact will always remain same that i love you"
+        </p>
+    </div>
+
+    <div id="game-page">
+        <div id="status-msg">Roll the dice to start!</div>
+        <div id="board-container" id="board">
+            <div id="token">😊</div>
+            </div>
+        <div id="dice-zone">
+            <button id="dice-btn" onclick="rollDice()">Roll Dice</button>
+            <p>Possible moves: 1, 4, 7, 11, 12, 18</p>
+        </div>
+    </div>
+
+    <div id="cake-modal" class="modal">
+        <div class="cake">🎂</div>
+        <div class="box-btn" onclick="showFinalMsg()">click me</div>
+    </div>
+
+    <div id="final-modal" class="modal">
+        <h2>Happiest birthday</h2>
+        <div class="box-btn" onclick="showSurprise()">Wanna See a Surprise</div>
+    </div>
+
+    <div id="surprise-modal" class="modal">
+        <a href="https://suruwjwj" target="_blank" style="font-size: 2rem; color: #ff69b4;">suruwjwj</a>
+    </div>
+
+    <script>
+        const board = document.getElementById('board-container');
+        const token = document.getElementById('token');
+        const status = document.getElementById('status-msg');
+        let currentPos = 0;
+
+        // Custom Dice
+        const diceValues = [1, 4, 7, 11, 12, 18];
+        const quotes = {
+            1: "You will always be my best frnd",
+            4: "Your birthday month ofc!",
+            7: "You are my favorite person",
+            11: "The class I met you will always be the best year",
+            12: "The class we became bestfrnds",
+            18: "Finally your birthday date!"
+        };
+
+        // Simplified Snakes (Chocolates)
+        const chocolates = { 98: 20, 70: 30, 50: 5, 25: 2 };
+
+        // Build Board
+        for (let i = 100; i >= 1; i--) {
+            let cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.id = 'cell-' + i;
+            cell.innerText = i;
+            // Visual for "Chocolate" traps
+            if (chocolates[i]) cell.style.background = '#eaddca';
+            board.appendChild(cell);
+        }
+
+        function showGame() {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('game-page').style.display = 'block';
+            updateTokenPosition();
+        }
+
+        function rollDice() {
+            const roll = diceValues[Math.floor(Math.random() * diceValues.length)];
+            status.innerText = "You rolled a " + roll + "! " + (quotes[roll] || "");
+            
+            currentPos += roll;
+            if (currentPos > 100) currentPos = 100;
+
+            // Check for Chocolates (Snakes)
+            if (chocolates[currentPos]) {
+                setTimeout(() => {
+                    status.innerText = "Oh no! A chocolate slide! 🍫";
+                    currentPos = chocolates[currentPos];
+                    updateTokenPosition();
+                }, 600);
+            }
+
+            updateTokenPosition();
+
+            if (currentPos === 100) {
+                setTimeout(() => {
+                    document.getElementById('cake-modal').style.display = 'block';
+                }, 600);
+            }
+        }
+
+        function updateTokenPosition() {
+            if(currentPos === 0) return;
+            const targetCell = document.getElementById('cell-' + currentPos);
+            const rect = targetCell.getBoundingClientRect();
+            const boardRect = board.getBoundingClientRect();
+            
+            token.style.left = (targetCell.offsetLeft + 10) + 'px';
+            token.style.top = (targetCell.offsetTop + 10) + 'px';
+        }
+
+        function showFinalMsg() {
+            document.getElementById('cake-modal').style.display = 'none';
+            document.getElementById('final-modal').style.display = 'block';
+        }
+
+        function showSurprise() {
+            document.getElementById('final-modal').style.display = 'none';
+            document.getElementById('surprise-modal').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
